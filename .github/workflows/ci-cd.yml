@@ -33,7 +33,7 @@ jobs:
       - name: Start application for testing
         run: |
           npm start &
-          sleep 10
+          sleep 30
           curl -f http://localhost:3000 || exit 1
 
       - name: Stop application
