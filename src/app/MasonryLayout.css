@@ -1,0 +1,17 @@
+/* MasonryLayout.css */
+.masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px; /* Adjust the gap between items as needed */
+}
+
+.masonry-brick {
+  aspect-ratio: 2 / 3; /* Maintain a 2:3 aspect ratio */
+  overflow: hidden;
+}
+
+.masonry-brick img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensure the image covers the container */
+}
