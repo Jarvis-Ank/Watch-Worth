@@ -20,7 +20,7 @@ const Page = () => {
   >([]);
 
 
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY; // Replace with your TMDB API key
+  const apiKey = process.env.API_KEY;
 
 
 
@@ -116,50 +116,21 @@ const Page = () => {
     handleSearch(); // Fetch default images on initial load
   }, []);
 
-
   const handleSearch = async (query: string = "Movie") => {
-    const url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${query}&page=1&include_adult=true`;
     try {
-      const response = await fetch(url);
+      const response = await fetch(`/api/search?query=${query}`);
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+      }
       const data = await response.json();
 
-      console.log(query ? "Search Results: " : "Default Results: ", data.results);
+      console.log(query ? "Search Results: " : "Default Results: ", data);
 
-      setImages(
-        data.results
-          .slice(0, 30) // Limit to top 20 results
-          .map((movie: {
-            known_for: { poster_path: string; }[];
-            backdrop_path: string;
-            first_air_date: string;
-            original_name: string;
-            name: string;
-            id: number;
-            poster_path: string;
-            title: string;
-            overview: string;
-            release_date: string;
-            media_type: string;
-          }) => ({
-            id: movie.id,
-            url: movie?.poster_path
-              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-              : movie?.backdrop_path
-                ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`
-                : movie?.known_for?.[0]?.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${movie.known_for[0].poster_path}`
-                  : "https://via.placeholder.com/200x300",// Fallback placeholder
-            title: movie.title || movie.name || movie.original_name || movie || "Untitled",
-            overview: movie.overview || movie.first_air_date || "No description available.",
-            release_date: movie.release_date || movie.first_air_date || "Unknown release date",
-            media_type: movie.media_type,
-          }))
-      );
+      setImages(data);
     } catch (error) {
       console.error("Error fetching results:", error);
     }
   };
-
 
   const handleAddToNav = async (movie: {
     id: number;
@@ -201,39 +172,14 @@ const Page = () => {
 
   const getRunTime = async (uid: number, type: string) => {
     try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/${type}/${uid}?api_key=${apiKey}`
-      );
+      const response = await fetch(`/api/runtime?uid=${uid}&type=${type}`);
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+      }
       const data = await response.json();
 
-      let totalRuntimeMinutes = 0;
-
-      if (type === "tv" && data.episode_run_time.length > 1) {
-        // Calculate average episode runtime if episode_run_time is an array
-        const avgEpisodeRuntime =
-          Array.isArray(data.episode_run_time) && data.episode_run_time.length
-            ? data.episode_run_time.reduce((a: number, b: number) => a + b, 0) /
-            data.episode_run_time.length
-            : 0;
-
-        const numberOfEpisodes = Number(data.number_of_episodes) || 0;
-
-        // Calculate total runtime for TV shows based on the average episode runtime
-        totalRuntimeMinutes = avgEpisodeRuntime * numberOfEpisodes;
-
-        console.log(
-          `TV Show: ${data.original_name} | Episodes: ${numberOfEpisodes} | Total Runtime (mins): ${totalRuntimeMinutes}`
-        );
-      } else {
-        totalRuntimeMinutes = Number(data.runtime) || 0;
-
-        console.log(
-          `Movie: ${data.original_title} | Runtime (mins): ${totalRuntimeMinutes}`
-        );
-      }
-
-      // Convert total runtime to DD:HH:MM format
-      const runTimeDays = convertMinutesToDDHHMM(totalRuntimeMinutes);
+      const totalRuntimeMinutes = data.totalRuntimeMinutes;
+      const runTimeDays = data.runTimeDays;
 
       console.log(
         `Runtime: ${runTimeDays.DD} days, ${runTimeDays.HH} hours, ${runTimeDays.MM} minutes`
@@ -260,7 +206,6 @@ const Page = () => {
       MM: remainingMinutes,
     };
   };
-
 
   /* Total Tinme  */
   const calculateTotalRuntime = () => {
