@@ -19,11 +19,6 @@ const Page = () => {
     { id: number; title: string; release_date: string; runtime: number; runtimeFormated: { MM: number; DD: number; HH: number; } }[]
   >([]);
 
-
-  const apiKey = process.env.API_KEY;
-
-
-
   const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
