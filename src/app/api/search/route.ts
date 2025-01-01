@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('query') || "Movie";
-  const apiKey = process.env.API_KEY; // Server-side environment variable
+  const apiKey = process.env.API_KEY;  // Server-side environment variable
 
   const url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${query}&page=1&include_adult=true`;
 
