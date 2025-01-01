@@ -20,8 +20,6 @@ export async function GET(request: Request) {
       throw new Error('Invalid data structure: results is not an array');
     }
 
-    let totalRuntimeMinutes = 0;
-
     if (data.results.length > 0) {
       const results = data.results.slice(0, 30).map((movie: {
         known_for: { poster_path: string; }[];
