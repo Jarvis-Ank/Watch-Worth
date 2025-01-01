@@ -11,7 +11,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    env:
+      API_KEY: ${{ secrets.WATCH_WORTH_API_KEY }}
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -41,3 +43,20 @@ jobs:
 
       - name: Stop application
         run: pkill -f "node" || echo "No Node.js processes to kill"
+  dockerize:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push Docker image
+        run: |
+         docker build -t z3ron/devops:latest .
+         docker push z3ron/devops:latest
